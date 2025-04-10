@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: linear-gradient(180deg, #0f021e, #1a0033);
+            color: white;
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            background-image: url('https://files.catbox.moe/6y1zuu.png');
+            background-size: cover;
+            z-index: 100;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-content {
+            background: linear-gradient(180deg, rgba(0, 0, 255, 0.7), rgba(0, 0, 0, 0.7));
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .populer-card {
+            background-color: #1b1b2f;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 0 10px #8f00ff40;
+        }
+        .active-tab {
+            background-color: #a855f7 !important;
+            color: white !important;
+        }
+        .kategori-tabs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin: 1rem;
+        }
+        .kategori-tabs button {
+            background-color: #2e2e3f;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .kategori-tabs button.active-tab {
+            background-color: #a855f7;
+        }
+        .banner {
+            width: 100%;
+            height: 230px;
+            overflow: hidden;
+            position: relative;
+        }
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            transition: opacity 0.5s ease;
+        }
+        .ad-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+        }
+        .ad-modal.active {
+            display: block;
+        }
+        .catalog {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .catalog-item {
+            background-color: #1b1b2f;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .catalog-item:hover {
+            transform: scale(1.05);
+        }
+        .separator {
+            height: 1px;
+            background-color: #a855f7;
+            margin: 2rem 0;
+        }
+        .social-media {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .social-media a {
+            margin: 0 10px;
+            color: white;
+            text-decoration: none;
+        }
+        .faq, .about {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #1b1b2f;
+            border-radius: 1rem;
+        }
+        .topup-section {
+            display: none; /* Hide by default */
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Header -->
+    <div class="p-4 flex items-center justify-between border-b border-purple-900">
+        <div class="flex items-center w-full">
+            <i class="fas fa-gamepad text-purple-400 text-2xl"></i>
+            <input type="text" placeholder ="KXP" class="ml-4 w-full p-2 bg-[#1f1f2e] text-white rounded-lg focus:outline-none" />
+        </div>
+        <div class="flex items-center space-x-4 ml-4">
+            <i class="fas fa-globe text-white"></i>
+            <i class="fas fa-bars text-white cursor-pointer" onclick="toggleSidebar()"></i>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full sidebar">
+        <div class="sidebar-content">
+            <h2 class="text-xl font-bold mb-4">Sidebar Menu</h2>
+            <ul>
+                <li class="mb-2"><a href="#" class="text-white" onclick="renderKategori('HOME')">Home</a></li>
+                <li class="mb-2"><a href="#" class="text-white" onclick="renderKategori('TOP UP')">Top Up</a></li>
+                <li class="mb-2"><a href="#" class="text-white" onclick="renderKategori('TOKO AKUN')">Toko Akun</a></li>
+                <li class="mb-2"><a href="#" class="text-white">Help</a></li>
+                <li class="mb-2"><a href="#" class="text-white">About Us</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="banner">
+        <img src="https://files.catbox.moe/77uf4w.jpg" alt="Banner 1" class="banner-image" />
+        <img src="https://files.catbox.moe/z3de2r.png" alt="Banner 2" class="banner-image" style="opacity: 0;" />
+        <img src="https://files.catbox.moe/y9y6th.png" alt="Banner 3" class="banner-image" style="opacity: 0;" />
+    </div>
+
+    <!-- Ad Modal -->
+    <div id="adModal" class="ad-modal active">
+        <h2>Peringatan !!</h2>
+        <p>Pencet katalog nya sekali aja ya?!jika delay,itu tanda nya sedang loading.</p>
+        <button onclick="closeAd()" class="bg-purple-500 text-white rounded px-4 py-2">Close</button>
+    </div>
+
+    <!-- Populer Section -->
+    <div class="p-4">
+        <h2 class="text-xl font-bold mb-4">Populer</h2>
+        <div id="populerContainer" class="grid grid-cols-2 gap-4">
+            <!-- Dynamic Content Added Here -->
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- Catalog Section -->
+        <h2 class="text-xl font-bold mb-4">Catalog</h2>
+        <div class="catalog" id="catalogContainer">
+            <!-- Dynamic Catalog Items will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="kategori-tabs">
+        <button class="active-tab" onclick="renderKategori('HOME')">HOME</button>
+        <button onclick="renderKategori('TOP UP')">TOP UP</button>
+        <button onclick="renderKategori('ROOM WANGI')">ROOM WANGI</button>
+    </div>
+
+    
+    <div class="home-section p-4">
+        <h2 class="text-xl font-bold mb-4">Welcome to the Home Section!</h2>
+        <p>This is the main area where you can find the latest updates and features.</p>
+    </div>
+
+    <!-- Top Up Section -->
+    <div class="topup-section p-4" style="display: none;">
+        <h2 class="text-xl font-bold mb-4">Top Up Options</h2>
+        <p>Here you can find various top-up options available for different games.</p>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-[#1f1f2e] p-4 flex justify-around items-center border-t border-purple-900">
+        <div class="flex flex-col items-center text-purple-400" onclick="renderKategori('HOME')">
+            <i class="fas fa-home"></i>
+            <span class="text-sm">Beranda</span>
+        </div>
+        <div class="flex flex-col items-ceter" onclick="renderKategori('TOP UP')">
+            <i class="fas fa-gem"></i>
+            <span class="text-sm">Top Up</span>
+        </div>
+        <div class="flex flex-col items-center" onclick="renderKategori('ROOM WANGI')">
+            <i class="fas fa-store"></i>
+            <span class="text-sm">Room Wangi</span>
+        </div>
+        <div class="flex flex-col items-center" onclick="renderKategori('JOKI')">
+            <i class="fas fa-gamepad"></i>
+            <span class="text-sm">Account</span>
+        </div>
+    </div>
+
+    <!-- Social Media Credit -->
+    <div class="social-media">
+        <a href="https://wa.me/62895415084082" target="_blank">📨 WhatsApp</a>
+        <a href="https://t.me/KairoXxD" target="_blank">✉️ Telegram</a>
+    </div>
+
+    <!-- Separator Line -->
+    <div class="separator"></div>
+
+    <!-- Warning Section -->
+    <div class="warning bg-red-600 text-white p-4 rounded-lg">
+        <h2 class="font-bold">⚠️ Peringatan</h2>
+        <p>Produk & item yang minkaii juall, produk seperti map hack & drone view menggunakan file bukan aplikasi. Item & Barang yang minkaii juall bergaransi, jika anda ingin mendapatkan garansi silahkan chat cs kairoxzpediaa untuk mendapat garansi. Gunakan aturan dengan bijak dengan aturan yang berlaku.</p>
+    </div>
+
+    <div class="container mx-auto p-4">
+        <div class="bg-gray-800 p-4 rounded-lg mb-4">
+            <h2 class="text-lg font-semibold mb-2">About KairoXzStoree</h2>
+            <p class="mb-2">
+                KairoXzStoree adalah penyedia layanan Jual-Beli dan layanan kebutuhan mobile legends yang berkomitmen untuk memberikan layanan dan kenyamanan terbaik kepada pelanggan kami. Kami menawarkan berbagai kebutuhan mobile legends dan akun yang sesuai dengan kebutuhan Anda, baik untuk keperluan pribadi maupun bisnis.
+            </p>
+            <p class="mb-2">
+                Dengan pengalaman bertahun-tahun di industri pelayanan krbutuhan mobile legends, kami memahami pentingnya keandalan, kecepatan, dan keamanan untuk akun mobile legends Anda. Layanan kami dilengkapi dengan teknologi yang dapat untuk memastikan chat anda di respon dengan cepat.
+            </p>
+            <p>
+                Dengan dukungan teknis 24/7 dan harga yang terjangkau, kami siap membantu Anda membangun akun mobile legends Anda dengan mudah dan efisien. Kepuasan pelanggan adalah prioritas utama kami, dan kami berkomitmen untuk memberikan pelayanan terbaik untuk setiap pelanggan.
+            </p>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq">
+            <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                <h2 class="text-xl font-bold mb-2">Frequently Asked Questions (FAQ)</h2>
+                <p><strong>Q: What is this app about?</strong></p>
+                <p>A: This app provides services related to gaming, including top-ups, account sales, and more.</p>
+                <p><strong>Q: How can I contact support?</strong></p>
+                <p>A: You can contact support through the Help section in the app.</p>
+                <p><strong>Q: Are there any promotions available?</strong></p>
+                <p>A: Yes, we regularly have promotions. Check the banner for the latest offers!</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-4 rounded-lg mb-4">
+            <h2 class="text-lg font-semibold mb-2">Media Sosial</h2>
+            <p class="mb-4">Ikuti kami di media sosial untuk mendapatkan informasi terbaru tentang produk, promo, dan tips seputar website.</p>
+            <div class="flex space-x-4 justify-center mb-4">
+                <a href="#" class="bg-green-500 p-2 rounded-full"><i class="fab fa-whatsapp text-white"></i></a>
+                <a href="#" class="bg-blue-500 p-2 rounded-full"><i class="fab fa-telegram text-white"></i></a>
+                <a href ="#" class="bg-blue-600 p-2 rounded-full"><i class="fab fa-tiktok text-white"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function closeAd() {
+            document.getElementById('adModal').classList.remove('active');
+        }
+
+        const dataKategori = {
+            'HOME': [
+                { title: 'Room Wangi', desc: 'Mobile Legends', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Drone View', desc: 'Anti Banned.', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Map Hack', desc: 'Anti Banned.', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Top Up', desc: 'Hemat 10%', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Top Up 2', desc: 'Via Login', img: 'https://files.catbox.moe/6y1zuu.png' }, 
+            ],
+            'TOP UP': [
+                { title: 'Top Up', desc: 'Mobile Legends', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Weekly Diamond Pass', desc:'Mobile Legends', img: 'https://files.catbox.moe/6y1zuu.png' },
+                { title: 'Top Up', desc: 'Free Fire', img: 'https://files.catbox.moe/6y1zuu.png' },
+            ],
+            'ROOM WANGI': [
+                { title: 'Room Wangi', desc: 'Normal Room Wangi', img: 'https://files.catbox.moe/a50gmw.jpg' },
+                { title: 'Room Wangi #2', desc: 'Premium Quality', img: 'https://files.catbox.moe/a50gmw.jpg' },
+                { title: 'Room Wangi #3', desc: 'High Quality', img: 'https://files.catbox.moe/a50gmw.jpg' }
+            ],
+            'PULSA, DATA & TAGIHAN': [
+                { title: 'ISI PULSA', desc: 'Semua Operator', img: 'https://cdn-icons-png.flaticon.com/512/1034/1034300.png' },
+                { title: 'PAKET DATA', desc: 'Semua Provider', img: 'https://cdn-icons-png.flaticon.com/512/2942/2942664.png' },
+                { title: 'TAGIHAN', desc: 'Semua Tagihan', img: 'https://cdn-icons-png.flaticon.com/512/1034/1034300.png' }
+            ]
+        };
+
+        function renderKategori(kategori) {
+            const container = document.getElementById('populerContainer');
+            const catalogContainer = document.getElementById('catalogContainer');
+            container.innerHTML = '';
+            catalogContainer.innerHTML = '';
+
+            // Hide all sections initially
+            document.querySelector('.home-section').style.display = 'none';
+            document.querySelector('.topup-section').style.display = 'none';
+
+            if (kategori === 'HOME') {
+                const homeSection = document.querySelector('.home-section');
+                homeSection.style.display = 'block'; // Show Home section
+            } else if (kategori === 'TOP UP') {
+                const topupSection = document.querySelector('.topup-section');
+                topupSection.style.display = 'block'; // Show Top Up section
+            }
+
+            // Populate the popular items based on the selected category
+            dataKategori[kategori].forEach(item => {
+                container.innerHTML += `
+                    <div class="populer-card flex items-center space-x-4">
+                        <img src="${item.img}" class=" rounded-full w-12 h-12" />
+                        <div><h3 class="font-bold">${item.title}</h3><p>${item.desc}</p></div>
+                    </div>`;
+            });
+
+            // Populate the catalog items based on the selected category
+            if (kategori === 'HOME' || kategori === 'TOP UP') {
+                const catalogItems = dataKategori[kategori ];
+                catalogItems.forEach(item => {
+                    catalogContainer.innerHTML += `
+                        <div class="catalog-item">
+                            <img src="${item.img}" class="w-full h-20 object-cover mb-2" />
+                            <a href="https://wa.me/62895415084082?text=minkaii+mintaa+list+${encodeURIComponent(item.title)}" target="_blank">
+                                <p>${item.title}</p>
+                                <p>${item.desc}</p>
+                            </a>
+                        </div>`;
+                });
+            }
+
+            // Update active tab
+            document.querySelectorAll('.kategori-tabs button').forEach(btn => {
+                btn.classList.remove('active-tab');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.kategori-tabs button')).find(b => b.innerText === kategori);
+            if (activeBtn) activeBtn.classList.add('active-tab');
+        }
+
+        // Image Slider Functionality
+        let currentIndex = 0;
+        const images = document.querySelectorAll('.banner img');
+        
+        function showImage(index) {
+            images.forEach((image, i) => {
+                image.style.opacity = (i === index) ? '1' : '0';
+            });
+        }
+
+        function startSlider() {
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % images.length;
+                showImage(currentIndex);
+            }, 5000); // Change image every 5 seconds
+        }
+
+        // Automatically render the "HOME" category on page load
+        renderKategori('HOME');
+
+        startSlider(); // Start the image slider
+
+        // Load more items on scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                loadMoreItems();
+            }
+        });
+
+        function loadMoreItems() {
+            const container = document.getElementById('populerContainer');
+            const currentCategory = document.querySelector('.kategori-tabs button.active-tab').innerText;
+
+            const additionalItems = dataKategori[currentCategory].slice(container.children.length, container.children.length + 4);
+            additionalItems.forEach(item => {
+                container.innerHTML += `
+                    <div class="populer-card flex items-center space-x-4">
+                        <img src="${item.img}" class="rounded-full w-12 h-12" />
+                        <div><h3 class="font-bold">${item.title}</h3><p>${item.desc}</p></div>
+                    </div>`;
+            });
+        }
+    </script>
+</body>
+</html>
